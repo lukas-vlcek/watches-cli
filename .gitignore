@@ -4,3 +4,8 @@
 *.egg-info
 build
 dist
+*.iml
+
+# These are generated in sg_init.sh script
+tests/conf/node-0-keystore.jks
+tests/conf/truststore.jks

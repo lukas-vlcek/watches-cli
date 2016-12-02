@@ -3,13 +3,14 @@
 
 import json
 from subprocess import PIPE, Popen as popen
-from unittest import TestCase
+from secure_support import TestSecureSupport
 from elasticsearch import Elasticsearch
 
 
-class TestClusterHealth(TestCase):
+class TestClusterHealth(TestSecureSupport):
     def test_returns_json(self):
-        output = popen(['watches', 'cluster_health'], stdout=PIPE).communicate()[0]
+        cmd = self.appendSecurityContext(['watches', 'cluster_health'])
+        output = popen(cmd, stdout=PIPE).communicate()[0]
         o = json.loads(output)
         self.assertTrue(len(o) == 15)
         self.assertTrue('status' in o)
@@ -18,7 +19,8 @@ class TestClusterHealth(TestCase):
 
 
     def test_returns_cluster_health_with_sniffing(self):
-        output = popen(['watches', 'cluster_health', '--sniff'], stdout=PIPE).communicate()[0]
+        cmd = self.appendSecurityContext(['watches', 'cluster_health', '--sniff'])
+        output = popen(cmd, stdout=PIPE).communicate()[0]
         o = json.loads(output)
         self.assertTrue(len(o) == 15)
         self.assertTrue('status' in o)
@@ -26,19 +28,22 @@ class TestClusterHealth(TestCase):
         self.assertTrue('number_of_nodes' in o)
 
     def test_returns_cluster_health_with_verbose(self):
-        output = popen(['watches', 'cluster_health', '--verbose'], stdout=PIPE).communicate()[0]
+        cmd = self.appendSecurityContext(['watches', 'cluster_health', '--verbose'])
+        output = popen(cmd, stdout=PIPE).communicate()[0]
         # Unless we index some data to cluster we can only check the indices field is present
         self.assertTrue('Supplied options' in output)
 
     def test_returns_cluster_health_with_timestamp(self):
-        output = popen(['watches', 'cluster_health', '--timestamp'], stdout=PIPE).communicate()[0]
+        cmd = self.appendSecurityContext(['watches', 'cluster_health', '--timestamp'])
+        output = popen(cmd, stdout=PIPE).communicate()[0]
         # Unless we index some data to cluster we can only check the indices field is present
         o = json.loads(output)
         self.assertTrue(len(o) == 16)
         self.assertTrue('timestamp' in o)
 
     def test_returns_cluster_health(self):
-        output = popen(['watches', 'cluster_health'], stdout=PIPE).communicate()[0]
+        cmd = self.appendSecurityContext(['watches', 'cluster_health'])
+        output = popen(cmd, stdout=PIPE).communicate()[0]
         o = json.loads(output)
         self.assertTrue('cluster_name' in o)
         self.assertTrue('number_of_nodes' in o)
@@ -54,7 +59,8 @@ class TestClusterHealth(TestCase):
         self.assertTrue('timestamp' not in o)
 
     def test_returns_cluster_health_with_indices(self):
-        output = popen(['watches', 'cluster_health', '--level=indices'], stdout=PIPE).communicate()[0]
+        cmd = self.appendSecurityContext(['watches', 'cluster_health', '--level=indices'])
+        output = popen(cmd, stdout=PIPE).communicate()[0]
         o = json.loads(output)
         self.assertTrue('indices' in o)
         self.assertTrue('shards' not in o)
@@ -66,7 +72,8 @@ class TestClusterHealth(TestCase):
         es = Elasticsearch()
         es.create(index='i', doc_type='t', id='1', body={}, ignore=409, refresh=True)
 
-        output = popen(['watches', 'cluster_health', '--level=shards'], stdout=PIPE).communicate()[0]
+        cmd = self.appendSecurityContext(['watches', 'cluster_health', '--level=shards'])
+        output = popen(cmd, stdout=PIPE).communicate()[0]
         o = json.loads(output)
         self.assertTrue('indices' in o)
         self.assertTrue('shards' in o['indices']['i'])
