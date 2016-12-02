@@ -3,17 +3,19 @@
 
 import json
 from subprocess import PIPE, Popen as popen
-from unittest import TestCase
+from secure_support import TestSecureSupport
 
 
-class TestClusterState(TestCase):
+class TestClusterState(TestSecureSupport):
     def test_returns_json(self):
-        output = popen(['watches', 'cluster_state'], stdout=PIPE).communicate()[0]
+        cmd = self.appendSecurityContext(['watches', 'cluster_state'])
+        output = popen(cmd, stdout=PIPE).communicate()[0]
         o = json.loads(output)
         self.assertTrue(len(o) == 9)
 
     def test_returns_cluster_state(self):
-        output = popen(['watches', 'cluster_state'], stdout=PIPE).communicate()[0]
+        cmd = self.appendSecurityContext(['watches', 'cluster_state'])
+        output = popen(cmd, stdout=PIPE).communicate()[0]
         o = json.loads(output)
         self.assertTrue('cluster_name' in o)
         self.assertTrue('state_uuid' in o)

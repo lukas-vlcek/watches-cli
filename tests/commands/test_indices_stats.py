@@ -3,13 +3,14 @@
 
 import json
 from subprocess import PIPE, Popen as popen
-from unittest import TestCase
+from secure_support import TestSecureSupport
 from elasticsearch import Elasticsearch
 
 
-class TestIndicesStats(TestCase):
+class TestIndicesStats(TestSecureSupport):
     def test_returns_json(self):
-        output = popen(['watches', 'indices_stats'], stdout=PIPE).communicate()[0]
+        cmd = self.appendSecurityContext(['watches', 'indices_stats'])
+        output = popen(cmd, stdout=PIPE).communicate()[0]
         o = json.loads(output)
         self.assertTrue(len(o) == 2)
 
@@ -20,7 +21,8 @@ class TestIndicesStats(TestCase):
         es = Elasticsearch()
         es.create(index='i', doc_type='t', id='1', body={}, ignore=409, refresh=True)
 
-        output = popen(['watches', 'indices_stats',], stdout=PIPE).communicate()[0]
+        cmd = self.appendSecurityContext(['watches', 'indices_stats'])
+        output = popen(cmd, stdout=PIPE).communicate()[0]
         o = json.loads(output)
         self.assertTrue(len(o) == 2)
         self.assertTrue('_all' in o)
@@ -33,7 +35,8 @@ class TestIndicesStats(TestCase):
         es = Elasticsearch()
         es.create(index='i', doc_type='t', id='1', body={}, ignore=409, refresh=True)
 
-        output = popen(['watches', 'indices_stats', '--level=shards'], stdout=PIPE).communicate()[0]
+        cmd = self.appendSecurityContext(['watches', 'indices_stats', '--level=shards'])
+        output = popen(cmd, stdout=PIPE).communicate()[0]
         o = json.loads(output)
         self.assertTrue(len(o) == 3)
         self.assertTrue('_all' in o)
