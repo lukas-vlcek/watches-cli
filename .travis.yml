@@ -14,13 +14,13 @@ jdk:
 
 env:
   # different connection classes to test
-  - TEST_ES_CONNECTION=Urllib3HttpConnection ES_VERSION=2.4.1 SG_VER=2.4.1.8 SG_SSL_VER=2.4.1.16 ES_CONF=./tests/conf ES_HOME=/tmp/elasticsearch TMP_DIR=/tmp
-#  - TEST_ES_CONNECTION=RequestsHttpConnection ES_VERSION=2.4.1 SG_VER=2.4.1.8 SG_SSL_VER=2.4.1.16 ES_CONF=./tests/conf ES_HOME=/tmp/elasticsearch TMP_DIR=/tmp
+  - TEST_ES_CONNECTION=Urllib3HttpConnection ES_VER=2.4.1 SG_VER=2.4.1.8 SG_SSL_VER=2.4.1.16 ES_CONF=./tests/conf ES_HOME=/tmp/elasticsearch TMP_DIR=/tmp
+#  - TEST_ES_CONNECTION=RequestsHttpConnection ES_VER=2.4.1 SG_VER=2.4.1.8 SG_SSL_VER=2.4.1.16 ES_CONF=./tests/conf ES_HOME=/tmp/elasticsearch TMP_DIR=/tmp
 
 install:
-  - wget -O /tmp/es.zip "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=releases&g=org.elasticsearch.distribution.zip&a=elasticsearch&e=zip&v=${ES_VERSION}"
+  - wget -O /tmp/es.zip "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=releases&g=org.elasticsearch.distribution.zip&a=elasticsearch&e=zip&v=${ES_VER}"
   - unzip /tmp/es.zip -d ${TMP_DIR}
-  - mv /tmp/elasticsearch-${ES_VERSION} ${ES_HOME}
+  - mv /tmp/elasticsearch-${ES_VER} ${ES_HOME}
   # Install and setup Elasticsearch & SearchGuard plugins
   - chmod u+x ./tests/setup/sg_init.sh
   - ./tests/setup/sg_init.sh

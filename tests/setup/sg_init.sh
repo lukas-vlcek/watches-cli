@@ -66,8 +66,9 @@ ${ES_HOME}/bin/plugin install -b com.floragunn/search-guard-2/${SG_VER}
 cd ${ES_HOME}/plugins/search-guard-2/tools
 chmod u+x *.sh
 # sgadmin.sh uses the inter-node transport, not http
-cp ${TMP_DIR}/search-guard-ssl/example-pki-scripts/transport/node-0-keystore.jks ${ES_HOME}/plugins/search-guard-2/sgconfig
-cp ${TMP_DIR}/search-guard-ssl/example-pki-scripts/truststore.jks ${ES_HOME}/plugins/search-guard-2/sgconfig
+cp ${TMP_DIR}/search-guard-ssl/example-pki-scripts/truststore.jks ${ES_HOME}/plugins/search-guard-2/sgconfig/truststore.jks
+cp ${TMP_DIR}/search-guard-ssl/example-pki-scripts/transport/node-0-keystore.jks ${ES_HOME}/plugins/search-guard-2/sgconfig/transport-node-0-keystore.jks
+cd ${ACTUAL_DIR}
 
 if [ "${SG_SETUP_ONLY:-}" = true ] ; then
     exit 0
@@ -82,7 +83,7 @@ tail ${ES_HOME}/logs/elasticsearch.log
 cd ${ES_HOME}
 plugins/search-guard-2/tools/sgadmin.sh \
   -cd plugins/search-guard-2/sgconfig/ \
-  -ks plugins/search-guard-2/sgconfig/node-0-keystore.jks \
+  -ks plugins/search-guard-2/sgconfig/transport-node-0-keystore.jks \
   -ts plugins/search-guard-2/sgconfig/truststore.jks \
   -nhnv
 
@@ -109,5 +110,5 @@ curl -vs 'https://localhost:9200/_cluster/health?pretty' \
 
 # User spock is NOT an admin
 curl -sS --insecure -u kirk:kirk 'https://localhost:9200/'
-# This request should be rejected (403)
+echo This request should be rejected \(403\)
 curl -sS --insecure -u spock:spock 'https://localhost:9200/_cluster/health?pretty'
