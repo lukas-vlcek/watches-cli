@@ -3,7 +3,7 @@
 
 from datetime import datetime
 from json import dumps
-from elasticsearch import Elasticsearch
+from watches.util import ESClientProducer
 
 
 class Base(object):
@@ -17,26 +17,7 @@ class Base(object):
         if self.options["--verbose"]:
             print 'Supplied options:', dumps(self.options, indent=2, sort_keys=True)
 
-        user_kwargs = {}
-
-        user_kwargs["hosts"] = options["--url"]
-
-        if self.options["--sniff"]:
-            # sniff before doing anything
-            user_kwargs["sniff_on_start"] = True
-            # refresh nodes after a node fails to respond
-            user_kwargs["sniff_on_connection_fail"] = True
-            # and also every 60 seconds
-            user_kwargs["sniffer_timeout"] = 60
-
-        # We can test just for --cacert because all the three options are required
-        # if at least one of them is provided.
-        if self.options["--cacert"]:
-            user_kwargs["ca_certs"] = options["--cacert"]
-            user_kwargs["client_cert"] = options["--cert"]
-            user_kwargs["client_key"] = options["--key"]
-
-        self.es = Elasticsearch(**user_kwargs)
+        self.es = ESClientProducer.create_client(self.options)
 
     def run(self):
         # Not sure if this is the best way to convert localtime to UTC in ISO 8601 format

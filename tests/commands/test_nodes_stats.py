@@ -7,13 +7,13 @@ from secure_support import TestSecureSupport
 
 class TestNodesStats(TestSecureSupport):
     def test_returns_json(self):
-        cmd = self.appendSecurityContext(['watches', 'nodes_stats'])
+        cmd = self.appendSecurityCommands(['watches', 'nodes_stats'])
         output = popen(cmd, stdout=PIPE).communicate()[0]
         o = json.loads(output)
         self.assertTrue(len(o) == 2)
 
     def test_returns_cluster_stats(self):
-        cmd = self.appendSecurityContext(['watches', 'nodes_stats'])
+        cmd = self.appendSecurityCommands(['watches', 'nodes_stats'])
         output = popen(cmd, stdout=PIPE).communicate()[0]
         o = json.loads(output)
         self.assertTrue('cluster_name' in o)

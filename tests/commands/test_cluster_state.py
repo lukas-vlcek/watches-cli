@@ -8,13 +8,13 @@ from secure_support import TestSecureSupport
 
 class TestClusterState(TestSecureSupport):
     def test_returns_json(self):
-        cmd = self.appendSecurityContext(['watches', 'cluster_state'])
+        cmd = self.appendSecurityCommands(['watches', 'cluster_state'])
         output = popen(cmd, stdout=PIPE).communicate()[0]
         o = json.loads(output)
         self.assertTrue(len(o) == 9)
 
     def test_returns_cluster_state(self):
-        cmd = self.appendSecurityContext(['watches', 'cluster_state'])
+        cmd = self.appendSecurityCommands(['watches', 'cluster_state'])
         output = popen(cmd, stdout=PIPE).communicate()[0]
         o = json.loads(output)
         self.assertTrue('cluster_name' in o)

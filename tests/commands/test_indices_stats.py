@@ -4,12 +4,12 @@
 import json
 from subprocess import PIPE, Popen as popen
 from secure_support import TestSecureSupport
-from elasticsearch import Elasticsearch
+from watches.util import ESClientProducer
 
 
 class TestIndicesStats(TestSecureSupport):
     def test_returns_json(self):
-        cmd = self.appendSecurityContext(['watches', 'indices_stats'])
+        cmd = self.appendSecurityCommands(['watches', 'indices_stats'])
         output = popen(cmd, stdout=PIPE).communicate()[0]
         o = json.loads(output)
         self.assertTrue(len(o) == 2)
@@ -17,11 +17,12 @@ class TestIndicesStats(TestSecureSupport):
     def test_returns_nodes_info_cluster_level(self):
 
         # Unless we index some data to cluster the output does not contain "shards" part
-        # TODO: make ES client configurable, now it is hardcoded to default: 'http://localhost:9200'
-        es = Elasticsearch()
+        es = ESClientProducer.create_client(
+            self.options_from_list(self.appendSecurityCommands([]))
+        )
         es.create(index='i', doc_type='t', id='1', body={}, ignore=409, refresh=True)
 
-        cmd = self.appendSecurityContext(['watches', 'indices_stats'])
+        cmd = self.appendSecurityCommands(['watches', 'indices_stats'])
         output = popen(cmd, stdout=PIPE).communicate()[0]
         o = json.loads(output)
         self.assertTrue(len(o) == 2)
@@ -31,11 +32,12 @@ class TestIndicesStats(TestSecureSupport):
     def test_returns_nodes_info_shards_level(self):
 
         # Unless we index some data to cluster the output does not contain "shards" part
-        # TODO: make ES client configurable, now it is hardcoded to default: 'http://localhost:9200'
-        es = Elasticsearch()
+        es = ESClientProducer.create_client(
+            self.options_from_list(self.appendSecurityCommands([]))
+        )
         es.create(index='i', doc_type='t', id='1', body={}, ignore=409, refresh=True)
 
-        cmd = self.appendSecurityContext(['watches', 'indices_stats', '--level=shards'])
+        cmd = self.appendSecurityCommands(['watches', 'indices_stats', '--level=shards'])
         output = popen(cmd, stdout=PIPE).communicate()[0]
         o = json.loads(output)
         self.assertTrue(len(o) == 3)

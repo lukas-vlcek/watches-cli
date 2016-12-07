@@ -4,12 +4,12 @@
 import json
 from subprocess import PIPE, Popen as popen
 from secure_support import TestSecureSupport
-from elasticsearch import Elasticsearch
+from watches.util import ESClientProducer
 
 
 class TestClusterHealth(TestSecureSupport):
     def test_returns_json(self):
-        cmd = self.appendSecurityContext(['watches', 'cluster_health'])
+        cmd = self.appendSecurityCommands(['watches', 'cluster_health'])
         output = popen(cmd, stdout=PIPE).communicate()[0]
         o = json.loads(output)
         self.assertTrue(len(o) == 15)
@@ -19,7 +19,7 @@ class TestClusterHealth(TestSecureSupport):
 
 
     def test_returns_cluster_health_with_sniffing(self):
-        cmd = self.appendSecurityContext(['watches', 'cluster_health', '--sniff'])
+        cmd = self.appendSecurityCommands(['watches', 'cluster_health', '--sniff'])
         output = popen(cmd, stdout=PIPE).communicate()[0]
         o = json.loads(output)
         self.assertTrue(len(o) == 15)
@@ -28,13 +28,13 @@ class TestClusterHealth(TestSecureSupport):
         self.assertTrue('number_of_nodes' in o)
 
     def test_returns_cluster_health_with_verbose(self):
-        cmd = self.appendSecurityContext(['watches', 'cluster_health', '--verbose'])
+        cmd = self.appendSecurityCommands(['watches', 'cluster_health', '--verbose'])
         output = popen(cmd, stdout=PIPE).communicate()[0]
         # Unless we index some data to cluster we can only check the indices field is present
         self.assertTrue('Supplied options' in output)
 
     def test_returns_cluster_health_with_timestamp(self):
-        cmd = self.appendSecurityContext(['watches', 'cluster_health', '--timestamp'])
+        cmd = self.appendSecurityCommands(['watches', 'cluster_health', '--timestamp'])
         output = popen(cmd, stdout=PIPE).communicate()[0]
         # Unless we index some data to cluster we can only check the indices field is present
         o = json.loads(output)
@@ -42,7 +42,7 @@ class TestClusterHealth(TestSecureSupport):
         self.assertTrue('timestamp' in o)
 
     def test_returns_cluster_health(self):
-        cmd = self.appendSecurityContext(['watches', 'cluster_health'])
+        cmd = self.appendSecurityCommands(['watches', 'cluster_health'])
         output = popen(cmd, stdout=PIPE).communicate()[0]
         o = json.loads(output)
         self.assertTrue('cluster_name' in o)
@@ -59,7 +59,7 @@ class TestClusterHealth(TestSecureSupport):
         self.assertTrue('timestamp' not in o)
 
     def test_returns_cluster_health_with_indices(self):
-        cmd = self.appendSecurityContext(['watches', 'cluster_health', '--level=indices'])
+        cmd = self.appendSecurityCommands(['watches', 'cluster_health', '--level=indices'])
         output = popen(cmd, stdout=PIPE).communicate()[0]
         o = json.loads(output)
         self.assertTrue('indices' in o)
@@ -68,11 +68,12 @@ class TestClusterHealth(TestSecureSupport):
     def test_returns_cluster_health_with_shards(self):
 
         # Unless we index some data to cluster the output does not contain "shards" part
-        # TODO: make ES client configurable, now it is hardcoded to default: 'http://localhost:9200'
-        es = Elasticsearch()
+        es = ESClientProducer.create_client(
+            self.options_from_list(self.appendSecurityCommands([]))
+        )
         es.create(index='i', doc_type='t', id='1', body={}, ignore=409, refresh=True)
 
-        cmd = self.appendSecurityContext(['watches', 'cluster_health', '--level=shards'])
+        cmd = self.appendSecurityCommands(['watches', 'cluster_health', '--level=shards'])
         output = popen(cmd, stdout=PIPE).communicate()[0]
         o = json.loads(output)
         self.assertTrue('indices' in o)

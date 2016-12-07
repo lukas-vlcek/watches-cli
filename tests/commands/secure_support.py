@@ -16,7 +16,7 @@ class TestSecureSupport(TestCase):
     }
 
     @staticmethod
-    def appendSecurityContext(list):
+    def appendSecurityCommands(list):
 
         # In the future we can override with env variable
         # import os
@@ -31,3 +31,11 @@ class TestSecureSupport(TestCase):
 
         # print "Secured command?", list
         return list
+
+    @staticmethod
+    def options_from_list(list):
+        # for i in list:
+        #     item = i.split('=')
+        #     o[item[0]] = item[1]
+        o = dict(item.split("=", 1) for item in list)
+        return o

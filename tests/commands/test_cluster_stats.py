@@ -8,13 +8,13 @@ from secure_support import TestSecureSupport
 
 class TestClusterStats(TestSecureSupport):
     def test_returns_multiple_lines(self):
-        cmd = self.appendSecurityContext(['watches', 'cluster_stats'])
+        cmd = self.appendSecurityCommands(['watches', 'cluster_stats'])
         output = popen(cmd, stdout=PIPE).communicate()[0]
         o = json.loads(output)
         self.assertTrue(len(o) == 5)
 
     def test_returns_cluster_stats(self):
-        cmd = self.appendSecurityContext(['watches', 'cluster_stats'])
+        cmd = self.appendSecurityCommands(['watches', 'cluster_stats'])
         output = popen(cmd, stdout=PIPE).communicate()[0]
         o = json.loads(output)
         self.assertTrue('cluster_name' in o)
