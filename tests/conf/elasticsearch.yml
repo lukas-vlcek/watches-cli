@@ -20,7 +20,7 @@ searchguard:
       enabled: true
       enforce_hostname_verification: false
       keystore_type: JKS
-      keystore_filepath: node-0-keystore.jks
+      keystore_filepath: transport-node-0-keystore.jks
       keystore_password: changeit
       truststore_type: JKS
       truststore_filepath: truststore.jks
@@ -29,7 +29,7 @@ searchguard:
     http:
       enabled: true
       keystore_type: JKS
-      keystore_filepath: node-0-keystore.jks
+      keystore_filepath: http-node-0-keystore.jks
       keystore_password: changeit
       clientauth_mode: OPTIONAL
       truststore_type: JKS

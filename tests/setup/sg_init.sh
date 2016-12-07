@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ex
+set -euxo pipefail
 
 # ----------------------------------------------
 # This script installs Search Guard plugins, starts Elasticsearch and finishes
@@ -11,7 +11,7 @@ set -ex
 # want to tweak them accordingly if testing locally.
 # ----------------------------------------------
 
-export ES_VERSION=${ES_VERSION:-2.4.1}
+export ES_VER=${ES_VER:-2.4.1}
 export SG_VER=${SG_VER:-2.4.1.8}
 export SG_SSL_VER=${SG_SSL_VER:-2.4.1.16}
 export TMP_DIR=${TMP_DIR:-/tmp}
@@ -35,15 +35,24 @@ ACTUAL_DIR=`pwd`
 [[ -d ${TMP_DIR} ]] || mkdir ${TMP_DIR}
 cd ${TMP_DIR}
 [[ -d ${TMP_DIR}/search-guard-ssl ]] && rm -rf ${TMP_DIR}/search-guard-ssl
-git clone https://github.com/floragunncom/search-guard-ssl.git
-cd search-guard-ssl
-git checkout v${SG_SSL_VER}
-cd example-pki-scripts/
+git clone https://github.com/floragunncom/search-guard-ssl.git -b v${SG_SSL_VER}
+cd search-guard-ssl/example-pki-scripts/
 ./example.sh
+# for the searchguard.ssl.transport.keystore
+mkdir transport
+# have to move these because gen_node_cert_no_oid.sh will overwrite them
+for nn in 0 1 2 ; do mv node-${nn}* transport ; done
+# the searchguard.ssl.http certs cannot use this oid due to bugs in python and openssl
+sed 's/,oid:1.2.3.4.5.5//g' gen_node_cert.sh > gen_node_cert_no_oid.sh
+chmod +x gen_node_cert_no_oid.sh
+# create http certs/trusts for nodes
+for nn in 0 1 2 ; do ./gen_node_cert_no_oid.sh $nn changeit capass ; done
+ls -alrtF
 cd ${ACTUAL_DIR}
 
-cp ${TMP_DIR}/search-guard-ssl/example-pki-scripts/truststore.jks ${ES_CONF}
-cp ${TMP_DIR}/search-guard-ssl/example-pki-scripts/node-0-keystore.jks ${ES_CONF}
+cp ${TMP_DIR}/search-guard-ssl/example-pki-scripts/truststore.jks ${ES_CONF}/truststore.jks
+cp ${TMP_DIR}/search-guard-ssl/example-pki-scripts/transport/node-0-keystore.jks ${ES_CONF}/transport-node-0-keystore.jks
+cp ${TMP_DIR}/search-guard-ssl/example-pki-scripts/node-0-keystore.jks ${ES_CONF}/http-node-0-keystore.jks
 
 # ----------------------------------------------
 # Install Search Guard plugin
@@ -53,17 +62,22 @@ cp ${TMP_DIR}/search-guard-ssl/example-pki-scripts/node-0-keystore.jks ${ES_CONF
 ${ES_HOME}/bin/plugin install -b com.floragunn/search-guard-2/${SG_VER}
 
 # ----------------------------------------------
-# Start elasticsearch
-${ES_HOME}/bin/elasticsearch -d --security.manager.enabled=false --path.conf=./tests/conf/
-sleep 15
-tail ${ES_HOME}/logs/elasticsearch.log
-
-# ----------------------------------------------
 # Make sure sgadmin tool is executable
 cd ${ES_HOME}/plugins/search-guard-2/tools
 chmod u+x *.sh
-cp ${TMP_DIR}/search-guard-ssl/example-pki-scripts/node-0-keystore.jks ${ES_HOME}/plugins/search-guard-2/sgconfig
+# sgadmin.sh uses the inter-node transport, not http
+cp ${TMP_DIR}/search-guard-ssl/example-pki-scripts/transport/node-0-keystore.jks ${ES_HOME}/plugins/search-guard-2/sgconfig
 cp ${TMP_DIR}/search-guard-ssl/example-pki-scripts/truststore.jks ${ES_HOME}/plugins/search-guard-2/sgconfig
+
+if [ "${SG_SETUP_ONLY:-}" = true ] ; then
+    exit 0
+fi
+
+# ----------------------------------------------
+# Start elasticsearch
+${ES_HOME}/bin/elasticsearch -d --security.manager.enabled=false --path.conf=${ES_CONF}/
+sleep 15
+tail ${ES_HOME}/logs/elasticsearch.log
 
 cd ${ES_HOME}
 plugins/search-guard-2/tools/sgadmin.sh \
