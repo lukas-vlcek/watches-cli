@@ -16,12 +16,12 @@ Synopsis
 The tool uses `docopt <http://docopt.org/>`_ to describe command line language and supports the following options::
 
     Usage:
-      watches cluster_health [-i=INTERVAL -d=DURATION --url=URL -tsv] [--level=LEVEL --local]
-      watches cluster_state  [-i=INTERVAL -d=DURATION --url=URL -tsv]
-      watches cluster_stats  [-i=INTERVAL -d=DURATION --url=URL -tsv]
-      watches nodes_stats    [-i=INTERVAL -d=DURATION --url=URL -tsv]
-      watches nodes_info     [-i=INTERVAL -d=DURATION --url=URL -tsv] [--node_id=NODE_ID]
-      watches indices_stats  [-i=INTERVAL -d=DURATION --url=URL -tsv] [--level=LEVEL --index=INDEX]
+      watches cluster_health [-i=INTERVAL -d=DURATION --url=URL -tsv] [(--cacert=CACERT --cert=CERT --key=KEY)] [--level=LEVEL --local]
+      watches cluster_state  [-i=INTERVAL -d=DURATION --url=URL -tsv] [(--cacert=CACERT --cert=CERT --key=KEY)]
+      watches cluster_stats  [-i=INTERVAL -d=DURATION --url=URL -tsv] [(--cacert=CACERT --cert=CERT --key=KEY)]
+      watches nodes_stats    [-i=INTERVAL -d=DURATION --url=URL -tsv] [(--cacert=CACERT --cert=CERT --key=KEY)]
+      watches nodes_info     [-i=INTERVAL -d=DURATION --url=URL -tsv] [(--cacert=CACERT --cert=CERT --key=KEY)] [--node_id=NODE_ID]
+      watches indices_stats  [-i=INTERVAL -d=DURATION --url=URL -tsv] [(--cacert=CACERT --cert=CERT --key=KEY)] [--level=LEVEL --index=INDEX]
       watches -h
       watches --version
 
@@ -32,6 +32,9 @@ The tool uses `docopt <http://docopt.org/>`_ to describe command line language a
       -t, --timestamp     Add timestamp field to data. The value is local datetime converted to UTC in ISO 8601 format.
       -s, --sniff         Turn on sniffing.
       -v, --verbose       Print more debug info: input options, ... etc.
+      --cacert=CACERT     Path to Certification Authority Certificate pem file
+      --cert=CERT         Path to Client Certificate pem file
+      --key=KEY           Path to Client Key pem file
       --level=LEVEL       Aggregation level of returned data, valid options: cluster, indices or shards. [default: cluster].
       --local             Return the local node information instead of master node.
       --node_id=NODE_ID   A comma-separated list of node IDs or names to limit the returned information; use `_local` to return information from local node you're connecting to [default: ].
@@ -51,6 +54,13 @@ The tool uses `docopt <http://docopt.org/>`_ to describe command line language a
 
       # Alternatively, using short option notation
       $ watches cluster_health -i 1 -d 10 -s
+
+      # Get cluster health from secured node
+      $ watches cluster_health \
+          --url=https://localhots:9200 \
+          --cacert /tmp/search-guard-ssl/example-pki-scripts/ca/chain-ca.pem \
+          --cert /tmp/search-guard-ssl/example-pki-scripts/kirk.crt.pem \
+          --key /tmp/search-guard-ssl/example-pki-scripts/kirk.key.pem
 
 To connect to Elasticsearch cluster ``watches`` uses official
 `elasticsearch-py <https://github.com/elastic/elasticsearch-py/>`_ client which
@@ -73,7 +83,7 @@ some*), you would run the following command::
 This will trigger `py.test <http://pytest.org/latest/>`_, along with its popular
 `coverage <https://pypi.python.org/pypi/pytest-cov>`_ plugin.
 
-Tests assume ES node running on ``http://localhost:9200``.
+Read `Testing.md <./tests/Testing.md>`_ to learn more details.
 
 Lastly, if you'd like to cut a new release of this CLI tool, and publish it to
 the Python Package Index (`PyPI <https://pypi.python.org/pypi>`_), you can do so

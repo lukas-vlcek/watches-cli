@@ -14,17 +14,19 @@ jdk:
 
 env:
   # different connection classes to test
-#  - TEST_ES_CONNECTION=Urllib3HttpConnection ES_VERSION=2.4.1
-  - TEST_ES_CONNECTION=RequestsHttpConnection ES_VERSION=2.4.1
+  - TEST_ES_CONNECTION=Urllib3HttpConnection ES_VERSION=2.4.1 SG_VER=2.4.1.8 SG_SSL_VER=2.4.1.16 ES_CONF=./tests/conf ES_HOME=/tmp/elasticsearch TMP_DIR=/tmp
+#  - TEST_ES_CONNECTION=RequestsHttpConnection ES_VERSION=2.4.1 SG_VER=2.4.1.8 SG_SSL_VER=2.4.1.16 ES_CONF=./tests/conf ES_HOME=/tmp/elasticsearch TMP_DIR=/tmp
 
 install:
   - wget -O /tmp/es.zip "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=releases&g=org.elasticsearch.distribution.zip&a=elasticsearch&e=zip&v=${ES_VERSION}"
-  - unzip /tmp/es.zip -d /tmp/
-  - mv /tmp/elasticsearch-${ES_VERSION} /tmp/elasticsearch
-#  - /tmp/elasticsearch/bin/elasticsearch -d -E script.inline=true -E path.repo=/tmp -E repositories.url.allowed_urls='http://*' -E node.attr.testattr=test
-  - /tmp/elasticsearch/bin/elasticsearch -d
-  - sleep 15
-#  - git clone https://github.com/elastic/elasticsearch.git ../elasticsearch
+  - unzip /tmp/es.zip -d ${TMP_DIR}
+  - mv /tmp/elasticsearch-${ES_VERSION} ${ES_HOME}
+  # Install and setup Elasticsearch & SearchGuard plugins
+  - chmod u+x ./tests/setup/sg_init.sh
+  - ./tests/setup/sg_init.sh
+  # Start ES
+#  - ${ES_HOME}/bin/elasticsearch -d -E script.inline=true -E path.repo=/tmp -E repositories.url.allowed_urls='http://*' -E node.attr.testattr=test
+#  - ${ES_HOME}/bin/elasticsearch -d --path.conf=$ES_CONF --security.manager.enabled=false
   - pip install -e .[test]
 
 script:
