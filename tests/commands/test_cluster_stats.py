@@ -43,3 +43,10 @@ class TestClusterStats(TestSecureSupport):
         self.assertTrue('segments' in indices)
         self.assertTrue('shards' in indices)
         self.assertTrue('store' in indices)
+
+    def test_returns_cluster_stats_filtered(self):
+        cmd = self.appendSecurityCommands(['watches', 'cluster_stats', '-f status'])
+        output = popen(cmd, stdout=PIPE).communicate()[0]
+        o = json.loads(output)
+        self.assertTrue(len(o) == 1)
+        self.assertTrue('status' in o)

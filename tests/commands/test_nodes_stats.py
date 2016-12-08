@@ -27,3 +27,18 @@ class TestNodesStats(TestSecureSupport):
         # check there is other interesting info
         self.assertTrue('jvm' in first_node_info)
         self.assertTrue('os' in first_node_info)
+
+    def test_returns_cluster_stats_filtered(self):
+        cmd = self.appendSecurityCommands(['watches', 'nodes_stats', '-f nodes.*.thread_pool.bulk'])
+        output = popen(cmd, stdout=PIPE).communicate()[0]
+        o = json.loads(output)
+        self.assertTrue(len(o) == 1)
+        node_id = o['nodes'].keys()[0]
+        bulk = o['nodes'][node_id]['thread_pool']['bulk']
+        self.assertTrue(len(bulk) == 6)
+        self.assertTrue('completed' in bulk)
+        self.assertTrue('rejected' in bulk)
+        self.assertTrue('queue' in bulk)
+        self.assertTrue('threads' in bulk)
+        self.assertTrue('largest' in bulk)
+        self.assertTrue('active' in bulk)

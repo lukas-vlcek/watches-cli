@@ -31,3 +31,9 @@ class Base(object):
 
     def getData(self):
         raise NotImplementedError('You must implement the run() method yourself!')
+
+    def check_filter_path(self, args):
+        if self.options['--filter_path'] and self.options["--filter_path"] is not None and len(self.options["--filter_path"]) > 0:
+            args.update({
+                'filter_path': self.options['--filter_path']
+            })

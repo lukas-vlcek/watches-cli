@@ -66,8 +66,6 @@ class TestClusterHealth(TestSecureSupport):
         self.assertTrue('shards' not in o)
 
     def test_returns_cluster_health_with_shards(self):
-
-        # Unless we index some data to cluster the output does not contain "shards" part
         es = ESClientProducer.create_client(
             self.options_from_list(self.appendSecurityCommands([]))
         )
@@ -78,3 +76,25 @@ class TestClusterHealth(TestSecureSupport):
         o = json.loads(output)
         self.assertTrue('indices' in o)
         self.assertTrue('shards' in o['indices']['i'])
+
+    def test_returns_cluster_health_with_shards_filtered(self):
+        es = ESClientProducer.create_client(
+            self.options_from_list(self.appendSecurityCommands([]))
+        )
+        es.create(index='i', doc_type='t', id='1', body={}, ignore=409, refresh=True)
+
+        cmd = self.appendSecurityCommands(['watches', 'cluster_health', '--level=shards',
+                                           '-f status', '-f *.*.status', '-f indices.*.shards.*.status'])
+        output = popen(cmd, stdout=PIPE).communicate()[0]
+        o = json.loads(output)
+
+        self.assertTrue(len(o) == 2)
+        self.assertTrue('status' in o)
+        self.assertTrue('indices' in o)
+
+        self.assertTrue(len(o['indices']['i']) == 2)
+        self.assertTrue('status' in o['indices']['i'])
+        self.assertTrue('shards' in o['indices']['i'])
+
+        self.assertTrue(len(o['indices']['i']['shards']['0']) == 1)
+        self.assertTrue('status' in o['indices']['i']['shards']['0'])

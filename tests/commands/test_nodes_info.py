@@ -29,3 +29,16 @@ class TestNodesInfo(TestSecureSupport):
         self.assertTrue('jvm' in first_node_info)
         self.assertTrue('os' in first_node_info)
         self.assertTrue('plugins' in first_node_info)
+
+    def test_returns_nodes_info_filtered(self):
+        cmd = self.appendSecurityCommands(['watches', 'nodes_info', '-f nodes.*.thread_pool.bulk'])
+        output = popen(cmd, stdout=PIPE).communicate()[0]
+        o = json.loads(output)
+        self.assertTrue(len(o) == 1)
+        node_id = o['nodes'].keys()[0]
+        bulk = o['nodes'][node_id]['thread_pool']['bulk']
+        self.assertTrue(len(bulk) == 4)
+        self.assertTrue('min' in bulk)
+        self.assertTrue('max' in bulk)
+        self.assertTrue('type' in bulk)
+        self.assertTrue('queue_size' in bulk)

@@ -8,4 +8,9 @@ class IndicesStats(Base):
     """Get indices stats"""
 
     def getData(self):
-        return self.es.indices.stats(index=self.options['--index'], level=self.options['--level'])
+        args = {
+            'index': self.options['--index'],
+            'level': self.options['--level']
+        }
+        self.check_filter_path(args)
+        return self.es.indices.stats(**args)

@@ -52,3 +52,12 @@ class TestIndicesStats(TestSecureSupport):
         _all = o['_all']
         self.assertTrue('total' in _all)
         self.assertTrue('primaries' in _all)
+
+    def test_returns_nodes_info_shards_level_filtered(self):
+        cmd = self.appendSecurityCommands(['watches', 'indices_stats', '-f _all.total.docs'])
+        output = popen(cmd, stdout=PIPE).communicate()[0]
+        o = json.loads(output)
+        docs = o['_all']['total']['docs']
+        self.assertTrue(len(docs) == 2)
+        self.assertTrue('count' in docs)
+        self.assertTrue('deleted' in docs)

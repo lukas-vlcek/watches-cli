@@ -8,5 +8,7 @@ class ClusterState(Base):
     """Get cluster state"""
 
     def getData(self):
-        return self.es.cluster.state()
+        args = {}
+        self.check_filter_path(args)
+        return self.es.cluster.state(**args)
 

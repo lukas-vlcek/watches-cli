@@ -8,5 +8,7 @@ class ClusterStats(Base):
     """Get cluster stats"""
 
     def getData(self):
-        return self.es.cluster.stats()
+        args = {}
+        self.check_filter_path(args)
+        return self.es.cluster.stats(**args)
 

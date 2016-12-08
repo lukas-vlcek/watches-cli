@@ -2,12 +2,12 @@
 watches
 
 Usage:
-  watches cluster_health [-i=INTERVAL -d=DURATION --url=URL -tsv] [(--cacert=CACERT --cert=CERT --key=KEY)] [--level=LEVEL --local]
-  watches cluster_state  [-i=INTERVAL -d=DURATION --url=URL -tsv] [(--cacert=CACERT --cert=CERT --key=KEY)]
-  watches cluster_stats  [-i=INTERVAL -d=DURATION --url=URL -tsv] [(--cacert=CACERT --cert=CERT --key=KEY)]
-  watches nodes_stats    [-i=INTERVAL -d=DURATION --url=URL -tsv] [(--cacert=CACERT --cert=CERT --key=KEY)]
-  watches nodes_info     [-i=INTERVAL -d=DURATION --url=URL -tsv] [(--cacert=CACERT --cert=CERT --key=KEY)] [--node_id=NODE_ID]
-  watches indices_stats  [-i=INTERVAL -d=DURATION --url=URL -tsv] [(--cacert=CACERT --cert=CERT --key=KEY)] [--level=LEVEL --index=INDEX]
+  watches cluster_health [-i=INTERVAL -d=DURATION --url=URL -tsv] [(--cacert=CACERT --cert=CERT --key=KEY)] [-f=FILTER...] [--level=LEVEL --local]
+  watches cluster_state  [-i=INTERVAL -d=DURATION --url=URL -tsv] [(--cacert=CACERT --cert=CERT --key=KEY)] [-f=FILTER...]
+  watches cluster_stats  [-i=INTERVAL -d=DURATION --url=URL -tsv] [(--cacert=CACERT --cert=CERT --key=KEY)] [-f=FILTER...]
+  watches nodes_stats    [-i=INTERVAL -d=DURATION --url=URL -tsv] [(--cacert=CACERT --cert=CERT --key=KEY)] [-f=FILTER...]
+  watches nodes_info     [-i=INTERVAL -d=DURATION --url=URL -tsv] [(--cacert=CACERT --cert=CERT --key=KEY)] [-f=FILTER...] [--node_id=NODE_ID]
+  watches indices_stats  [-i=INTERVAL -d=DURATION --url=URL -tsv] [(--cacert=CACERT --cert=CERT --key=KEY)] [-f=FILTER...] [--level=LEVEL --index=INDEX]
   watches -h
   watches --version
 
@@ -18,6 +18,7 @@ Options:
   -t, --timestamp     Add timestamp field to data. The value is local datetime converted to UTC in ISO 8601 format.
   -s, --sniff         Turn on sniffing.
   -v, --verbose       Print more debug info: input options, ... etc.
+  -f=FILTER, --filter_path=FILTER   Filter returned JSON (see http://elasticsearch-py.readthedocs.io/en/master/api.html#response-filtering)
   --cacert=CACERT     Path to Certification Authority Certificate pem file
   --cert=CERT         Path to Client Certificate pem file
   --key=KEY           Path to Client Key pem file
@@ -47,6 +48,9 @@ Examples:
       --cacert /tmp/search-guard-ssl/example-pki-scripts/ca/chain-ca.pem \
       --cert /tmp/search-guard-ssl/example-pki-scripts/kirk.crt.pem \
       --key /tmp/search-guard-ssl/example-pki-scripts/kirk.key.pem
+
+  # Filter cluster health for status fields
+  $ watches cluster_health --level=shards -f status -f indices.*.status -f indices.*.shards.*.status
 
 Help:
   For help using this tool, please open an issue on the GitHub repository:

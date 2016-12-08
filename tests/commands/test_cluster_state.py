@@ -31,3 +31,11 @@ class TestClusterState(TestSecureSupport):
         self.assertTrue('cluster_uuid' in metadata)
         self.assertTrue('templates' in metadata)
         self.assertTrue('indices' in metadata)
+
+    def test_returns_cluster_state_filtered(self):
+        cmd = self.appendSecurityCommands(['watches', 'cluster_state', '-f cluster_name', '-f master_node'])
+        output = popen(cmd, stdout=PIPE).communicate()[0]
+        o = json.loads(output)
+        self.assertTrue(len(o) == 2)
+        self.assertTrue('cluster_name' in o)
+        self.assertTrue('master_node' in o)

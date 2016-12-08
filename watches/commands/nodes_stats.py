@@ -8,4 +8,6 @@ class NodesStats(Base):
     """Get nodes stats"""
 
     def getData(self):
-        return self.es.nodes.stats()
+        args = {}
+        self.check_filter_path(args)
+        return self.es.nodes.stats(**args)
